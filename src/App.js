@@ -59,8 +59,6 @@ function App() {
   console.log("buffer: ", images);
 
   const uploadPost = async (desc) => {
-    console.log("Submitting file to ipfs...", buffer);
-
     try {
       const result = await ipfs.add(buffer);
       console.log('Ipfs result', result);
@@ -73,26 +71,17 @@ function App() {
     } catch (error) {
       console.error(error)
     }
-
-    // ipfs.add(buffer, (error, result) => {
-    //   console.log("Result: ", result);
-
-    //   if (error) {
-    //     console.log(error);
-    //     return;
-    //   } else {
-    //     soFi.methods
-    //       .uploadImage(result[0]?.hash, desc)
-    //       .send({
-    //         from: account,
-    //       })
-    //       .on("transactionHash", (hash) => {
-    //         setLoading(false);
-    //       });
-    //   }
-
-    // });
   };
+
+  const tipPost = (id, value) => {
+    setLoading(true)
+    soFi.methods.tipPostOwner(id).send({
+      from: account,
+      value: value
+    }).on('transactionHash', (hash) => {
+      setLoading(false)
+    })
+  }
 
   return (
     <div>
@@ -114,7 +103,7 @@ function App() {
           <br />
           <input
             type="text"
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleTextChange}
             placeholder="what's in your mind???"
           />
           <input type="submit" />
@@ -135,7 +124,19 @@ function App() {
                   <p>Tips:</p>
                 </div>
                 <div>
-                  <input type="text" />
+                  <small>
+                  TIPS: {Web3.utils.fromWei(image.tipAmount.toString(), 'Ether')} ETH
+                  </small>
+                </div>
+                <div>
+                  <button
+                    name={image.id}
+                    onClick={(e) => {
+                      let tipAmount = Web3.utils.toWei('0.1', 'Ether')
+                      console.log(e.target.name, tipAmount)
+                      tipPost(e.target.name, tipAmount)
+                    }}
+                  >Tip 0.1 ETH</button>
                 </div>
               </div>
             </div>
